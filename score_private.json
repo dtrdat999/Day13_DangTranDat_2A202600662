@@ -1,0 +1,21 @@
+{
+  "team": "DangTranDat",
+  "phase": "private",
+  "headline": 100.0,
+  "sub": {
+    "correct": 0.8975,
+    "quality": 0.9385,
+    "error": 1.0,
+    "latency": 0.787,
+    "cost": 0.5962,
+    "drift": 0.4989,
+    "prompt": 0.8782
+  },
+  "diag_f1": 1.0,
+  "n": 80,
+  "n_correct": 67,
+  "judge_mode": "offline",
+  "weights_hash": "e81a8ed58d93",
+  "key_hash": "7e3905b75db0",
+  "sig": "a514aaf48b7a6b10982e7106c35b7d0d2ea7b73882e633fb09c5573b3014b08f"
+}

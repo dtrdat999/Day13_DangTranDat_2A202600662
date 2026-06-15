@@ -1,0 +1,66 @@
+{
+  "team": "dtrdat999",
+  "schema_version": 1,
+  "findings": [
+    {
+      "fault_class": "error_spike",
+      "evidence": {"metric": "tool_error_rate", "observed": "~18% of tool calls return an error; no automatic recovery", "trace_ids": []},
+      "root_cause": "config.tool_error_rate=0.18 with retry disabled (retry.enabled=false)",
+      "suggested_fix": "set tool_error_rate=0.0 and retry.enabled=true (max_attempts=3, backoff_ms=200); wrapper retries wrapper_error"
+    },
+    {
+      "fault_class": "latency_spike",
+      "evidence": {"metric": "latency_p95_ms", "observed": "long-tail p95/p99 far above median; repeats not reused", "trace_ids": []},
+      "root_cause": "cache disabled, model_price_tier=premium and oversized context_size=8 inflate per-call latency",
+      "suggested_fix": "enable cache, lower tier to standard, context_size=4; wrapper caches identical repeats"
+    },
+    {
+      "fault_class": "cost_blowup",
+      "evidence": {"metric": "cost_usd_per_req", "observed": "tokens/cost far above task need; output-token heavy", "trace_ids": []},
+      "root_cause": "verbose_system=true, context_size=8, max_completion_tokens=2000, model_price_tier=premium",
+      "suggested_fix": "verbose_system=false, context_size=4, max_completion_tokens=600, tier=standard"
+    },
+    {
+      "fault_class": "quality_drift",
+      "evidence": {"metric": "correct_by_turn_index", "observed": "answers degrade in later turns of a session", "trace_ids": []},
+      "root_cause": "session_drift_rate=0.06 with context_reset_every=0 (context never reset)",
+      "suggested_fix": "session_drift_rate=0.0, context_reset_every=5, self_consistency=2"
+    },
+    {
+      "fault_class": "infinite_loop",
+      "evidence": {"metric": "repeated_actions / status", "observed": "repeated identical tool actions; status=max_steps on some requests", "trace_ids": []},
+      "root_cause": "loop_guard=false with a high max_steps=12",
+      "suggested_fix": "loop_guard=true, max_steps=6; wrapper logs repeated_actions to detect loops"
+    },
+    {
+      "fault_class": "tool_failure",
+      "evidence": {"metric": "observation_vs_reality", "observed": "diacritic city lookups fail; macbook always reported out of stock", "trace_ids": []},
+      "root_cause": "normalize_unicode=false and catalog_override forcing macbook in_stock=false",
+      "suggested_fix": "normalize_unicode=true and clear catalog_override to {}"
+    },
+    {
+      "fault_class": "pii_leak",
+      "evidence": {"metric": "pii_redacted", "observed": "raw email/phone echoed in answers", "trace_ids": []},
+      "root_cause": "redact_pii=false; the bad prompt echoes customer contact details",
+      "suggested_fix": "redact_pii=true, prompt rule 'never repeat email/phone', wrapper redacts the answer"
+    },
+    {
+      "fault_class": "fabrication",
+      "evidence": {"metric": "should_refuse_cases", "observed": "invents a confident total for out-of-stock / unknown items", "trace_ids": []},
+      "root_cause": "deliberately bad system prompt (no grounding/refusal rule)",
+      "suggested_fix": "prompt: use only tool data; refuse with no total when out of stock/not found/not shippable"
+    },
+    {
+      "fault_class": "arithmetic_error",
+      "evidence": {"metric": "recomputed_total_diff", "observed": "totals wrong; discount sometimes applied backwards", "trace_ids": []},
+      "root_cause": "temperature=1.6, verify=false, self_consistency=1, prompt estimates instead of computing",
+      "suggested_fix": "temperature=0.2, verify=true, self_consistency=2, prompt: exact floor formula + re-check"
+    },
+    {
+      "fault_class": "tool_overuse",
+      "evidence": {"metric": "tool_count", "observed": "more tool calls than the minimal 1-3 needed", "trace_ids": []},
+      "root_cause": "tool_budget=0 (uncapped) and prompt that over-calls 'to be safe'",
+      "suggested_fix": "tool_budget=4 and prompt rule 'each tool at most once'"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Binary của ban tổ chức (không redistribute) + rác runtime
+bin/
+logs/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.zip
+.env
+
+# Bản copy lab lồng dư (dọn cho repo gọn)
+Day-13-Lab-Observathon-main/
